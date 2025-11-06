@@ -1,6 +1,6 @@
-
 // tailwind.config.ts
 import type { Config } from "tailwindcss";
+import animate from "tailwindcss-animate";
 
 const config: Config = {
   darkMode: ["class"],
@@ -12,19 +12,17 @@ const config: Config = {
         foreground: "hsl(var(--foreground))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))"
+          foreground: "hsl(var(--primary-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))"
-        }
+          foreground: "hsl(var(--muted-foreground))",
+        },
       },
-      borderRadius: {
-        "2xl": "1rem"
-      }
-    }
+      borderRadius: { "2xl": "1rem" },
+    },
   },
-  plugins: [require("tailwindcss-animate")]
+  plugins: [animate],
 };
 export default config;
 
