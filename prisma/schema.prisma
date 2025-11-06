@@ -1,0 +1,84 @@
+
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+enum ReactionType { HEART }
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  image        String?
+  username     String   @unique
+  displayName  String?
+  bio          String?
+  createdAt    DateTime @default(now())
+  accounts     Account[]
+  sessions     Session[]
+  messages     Message[] @relation("UserMessages")
+  reactions    Reaction[]
+  aConvos      Conversation[] @relation("AConversations")
+  bConvos      Conversation[] @relation("BConversations")
+}
+model Conversation {
+  id        String   @id @default(cuid())
+  aId       String
+  bId       String
+  a         User     @relation("AConversations", fields: [aId], references: [id])
+  b         User     @relation("BConversations", fields: [bId], references: [id])
+  messages  Message[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([aId, bId])
+}
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User         @relation("UserMessages", fields: [senderId], references: [id])
+  body           String
+  createdAt      DateTime     @default(now())
+  editedAt       DateTime?
+  deletedAt      DateTime?
+  isDeleted      Boolean      @default(false)
+  reactions      Reaction[]
+  @@index([conversationId, createdAt])
+}
+model Reaction {
+  id        String       @id @default(cuid())
+  messageId String
+  message   Message      @relation(fields: [messageId], references: [id])
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+  type      ReactionType
+  createdAt DateTime     @default(now())
+  @@unique([messageId, userId, type])
+}
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+  @@unique([identifier, token])
+}
