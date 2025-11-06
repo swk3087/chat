@@ -1,5 +1,4 @@
-
-
+// src/app/chats/page.tsx
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -12,23 +11,17 @@ export default async function ChatsPage() {
   if (!me) return null;
   const convos = await prisma.conversation.findMany({
     where: { OR: [{ aId: me.id }, { bId: me.id }] },
-    orderBy: { updatedAt: "desc" },
+    orderBy: { updatedAt: "desc" }
   });
   return (
     <div className="space-y-2">
-      {convos.length === 0 && (
-        <div className="text-sm text-zinc-500 dark:text-zinc-400">아직 대화가 없습니다.</div>
-      )}
+      {convos.length === 0 && <div className="text-sm text-muted-foreground">아직 대화가 없습니다.</div>}
       {convos.map((c) => (
-        <Link
-          key={c.id}
-          href={`/chats/${c.id}`}
-          className="block rounded-2xl border p-3 hover:bg-muted"
-        >
-          {/* JS 표현은 중괄호로 감싸고, 텍스트는 따로 씁니다 */}
+        <Link key={c.id} href={`/chats/${c.id}`} className="block rounded-2xl border p-3 hover:bg-muted">
           대화방 #{c.id.slice(0, 6)}
         </Link>
       ))}
     </div>
   );
 }
+

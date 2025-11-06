@@ -1,8 +1,9 @@
-
+// src/components/ThemeToggle.tsx
 "use client";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { motion } from "framer-motion";
+
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const isDark = theme === "dark";
@@ -17,3 +18,4 @@ export function ThemeToggle() {
     </button>
   );
 }
+

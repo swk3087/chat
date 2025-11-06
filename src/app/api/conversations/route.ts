@@ -1,8 +1,9 @@
-
+// src/app/api/conversations/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({}, { status: 401 });
@@ -13,7 +14,8 @@ export async function POST(req: Request) {
   const convo = await prisma.conversation.upsert({
     where: { aId_bId: { aId, bId } },
     update: {},
-    create: { aId, bId },
+    create: { aId, bId }
   });
   return NextResponse.json(convo);
 }
+

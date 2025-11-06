@@ -1,14 +1,33 @@
 
+/* src/styles/globals.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light dark; }
-html, body { height: 100%; }
-body { @apply bg-white text-black dark:bg-zinc-950 dark:text-zinc-50; }
-.bg-background { @apply bg-white dark:bg-zinc-950; }
-.text-foreground { @apply text-black dark:text-zinc-50; }
-.bg-muted { @apply bg-zinc-100 dark:bg-zinc-900; }
-.bg-primary { @apply bg-zinc-900 dark:bg-zinc-100; }
-.text-primary-foreground { @apply text-white dark:text-zinc-900; }
-.border { @apply border-zinc-200 dark:border-zinc-800; }
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --primary: 217.2 91.2% 59.8%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+}
+
+html, body, #__next {
+  height: 100%;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+

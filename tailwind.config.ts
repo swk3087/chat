@@ -1,9 +1,30 @@
 
-import type { Config } from "tailwindcss"
+// tailwind.config.ts
+import type { Config } from "tailwindcss";
+
 const config: Config = {
   darkMode: ["class"],
-  content: ["./src/**/*.{ts,tsx}", "./pages/**/*.{ts,tsx}"],
-  theme: { extend: {} },
-  plugins: [],
-}
-export default config
+  content: ["./src/**/*.{ts,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))"
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))"
+        }
+      },
+      borderRadius: {
+        "2xl": "1rem"
+      }
+    }
+  },
+  plugins: [require("tailwindcss-animate")]
+};
+export default config;
+

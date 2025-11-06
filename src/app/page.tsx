@@ -1,6 +1,7 @@
-
+// src/app/page.tsx
 import NavTabs from "@/components/NavTabs";
 import { ThemeToggle } from "@/components/ThemeToggle";
+
 export default function Home() {
   return (
     <main className="space-y-4">
@@ -9,7 +10,8 @@ export default function Home() {
         <ThemeToggle />
       </div>
       <NavTabs />
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">프로필을 설정하고 채팅을 시작하세요.</p>
+      <p className="text-sm text-muted-foreground">프로필을 설정하고 채팅을 시작하세요.</p>
     </main>
   );
 }
+

@@ -1,9 +1,10 @@
-
+// src/app/api/messages/[id]/edit/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { pusherServer } from "@/lib/pusher";
+
 export async function PATCH(_req: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({}, { status: 401 });
@@ -12,8 +13,13 @@ export async function PATCH(_req: Request, { params }: { params: { id: string } 
   const msg = await prisma.message.findUnique({ where: { id: params.id } });
   if (!me || !msg || msg.senderId !== me.id) return NextResponse.json({}, { status: 403 });
   const elapsed = Date.now() - new Date(msg.createdAt).getTime();
-  if (elapsed > 5 * 60 * 1000 || msg.isDeleted) return NextResponse.json({ message: "edit window closed" }, { status: 409 });
-  const updated = await prisma.message.update({ where: { id: msg.id }, data: { body: String(body).trim(), editedAt: new Date() } });
+  if (elapsed > 5 * 60 * 1000 || msg.isDeleted)
+    return NextResponse.json({ message: "edit window closed" }, { status: 409 });
+  const updated = await prisma.message.update({
+    where: { id: msg.id },
+    data: { body: String(body).trim(), editedAt: new Date() }
+  });
   await pusherServer.trigger(`conversation-${msg.conversationId}`, "message:edit", updated);
   return NextResponse.json(updated);
 }
+

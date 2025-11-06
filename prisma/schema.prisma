@@ -1,48 +1,78 @@
+// prisma/schema.prisma
 
-generator client { provider = "prisma-client-js" }
-datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
-enum ReactionType { HEART }
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 이모지/리액션 타입 (필요시 확장)
+enum ReactionType {
+  HEART
+}
+
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String         @id @default(cuid())
+  email        String         @unique
   name         String?
   image        String?
-  username     String   @unique
+  username     String         @unique            // 공개 프로필 슬러그 (/u/[username])
   displayName  String?
   bio          String?
-  createdAt    DateTime @default(now())
+  createdAt    DateTime       @default(now())
+
+  // Relations
   accounts     Account[]
   sessions     Session[]
-  messages     Message[] @relation("UserMessages")
+  messages     Message[]      @relation("UserMessages")
   reactions    Reaction[]
   aConvos      Conversation[] @relation("AConversations")
   bConvos      Conversation[] @relation("BConversations")
 }
+
 model Conversation {
   id        String   @id @default(cuid())
+
+  // 1:1 고유 보장: 사용자 id를 정렬(aId <= bId)하여 저장
   aId       String
   bId       String
   a         User     @relation("AConversations", fields: [aId], references: [id])
   b         User     @relation("BConversations", fields: [bId], references: [id])
+
   messages  Message[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  @@unique([aId, bId])
+
+  // ✅ 읽음 표시 (각 사용자별 마지막 읽음 시각)
+  aLastSeenAt DateTime?
+  bLastSeenAt DateTime?
+
+  @@unique([aId, bId]) // 코드에서 aId_bId 복합 고유로 upsert 사용
 }
+
 model Message {
   id             String       @id @default(cuid())
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id])
+
   senderId       String
   sender         User         @relation("UserMessages", fields: [senderId], references: [id])
+
   body           String
   createdAt      DateTime     @default(now())
   editedAt       DateTime?
   deletedAt      DateTime?
   isDeleted      Boolean      @default(false)
+
   reactions      Reaction[]
+
+  // 조회/페이지네이션 최적화
   @@index([conversationId, createdAt])
 }
+
 model Reaction {
   id        String       @id @default(cuid())
   messageId String
@@ -51,34 +81,47 @@ model Reaction {
   user      User         @relation(fields: [userId], references: [id])
   type      ReactionType
   createdAt DateTime     @default(now())
+
+  // 토글 구현용 복합 유니크 (Prisma Client에서 messageId_userId_type으로 접근)
   @@unique([messageId, userId, type])
 }
+
+// ---------- NextAuth v4 어댑터 표준 스키마 ----------
+
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String? @db.Text
-  access_token       String? @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String? @db.Text
-  session_state      String?
-  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([provider, providerAccountId])
 }
+
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
+
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
 model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
+
   @@unique([identifier, token])
 }
+
