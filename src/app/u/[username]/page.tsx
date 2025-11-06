@@ -2,7 +2,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import Link from "next/link";
+// import Link from "next/link";  // ❌ 삭제
 
 export default async function PublicProfile({ params }: { params: { username: string } }) {
   const session = await getServerSession(authOptions);
@@ -13,19 +13,24 @@ export default async function PublicProfile({ params }: { params: { username: st
     ? await prisma.user.findUnique({ where: { email: session.user!.email! } })
     : null;
 
+  // 로그인 후 다시 이 프로필로 돌아오게 callbackUrl 추가(선택)
+  const signinHref = `/api/auth/signin?callbackUrl=${encodeURIComponent(`/u/${profile.username}`)}`;
+
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border p-4">
         <div className="text-lg font-semibold">{profile.displayName ?? profile.username}</div>
         <div className="text-sm text-muted-foreground">@{profile.username}</div>
       </div>
+
       {!self ? (
-        <Link
-          href="/api/auth/signin"
+        // ✅ Link 대신 일반 a 태그 (typedRoutes 영향 없음)
+        <a
+          href={signinHref}
           className="block rounded-2xl bg-primary px-4 py-2 text-center text-primary-foreground"
         >
           Google로 로그인하고 대화 시작
-        </Link>
+        </a>
       ) : self.id === profile.id ? (
         <div className="text-sm text-muted-foreground">내 프로필입니다.</div>
       ) : (
@@ -52,7 +57,7 @@ async function createOrOpen(formData: FormData) {
   const convo = await prisma.conversation.upsert({
     where: { aId_bId: { aId, bId } },
     create: { aId, bId },
-    update: {}
+    update: {},
   });
   return (global as any).redirect?.(`/chats/${convo.id}`) ?? null;
 }
