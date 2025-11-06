@@ -15,13 +15,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <AuthSessionProvider>
             <div className="mx-auto max-w-screen-sm p-3 sm:p-4">
               {/* 전역 헤더 */}
-              <div className="mb-4 flex items-center justify-between">
+              <!--div className="mb-4 flex items-center justify-between">
                 <h1 className="text-lg font-semibold">Chat</h1>
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
                   <AuthButton />
                 </div>
-              </div>
+              </div-->
 
               {children}
             </div>
