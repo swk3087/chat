@@ -1,16 +1,14 @@
 // prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl  = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // ← 이미 추가해둔 줄 유지
 }
 
-// 이모지/리액션 타입 (필요시 확장)
 enum ReactionType {
   HEART
 }
@@ -20,12 +18,15 @@ model User {
   email        String         @unique
   name         String?
   image        String?
-  username     String         @unique            // 공개 프로필 슬러그 (/u/[username])
+
+  // ✅ optional + unique (null 허용, 값이 있는 경우만 유니크)
+  username     String?        @unique
+
   displayName  String?
   bio          String?
+  emailVerified DateTime?     // ✅ NextAuth 표준 필드 추가
   createdAt    DateTime       @default(now())
 
-  // Relations
   accounts     Account[]
   sessions     Session[]
   messages     Message[]      @relation("UserMessages")
@@ -35,23 +36,18 @@ model User {
 }
 
 model Conversation {
-  id        String   @id @default(cuid())
-
-  // 1:1 고유 보장: 사용자 id를 정렬(aId <= bId)하여 저장
-  aId       String
-  bId       String
-  a         User     @relation("AConversations", fields: [aId], references: [id])
-  b         User     @relation("BConversations", fields: [bId], references: [id])
-
-  messages  Message[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // ✅ 읽음 표시 (각 사용자별 마지막 읽음 시각)
+  id          String   @id @default(cuid())
+  aId         String
+  bId         String
+  a           User     @relation("AConversations", fields: [aId], references: [id])
+  b           User     @relation("BConversations", fields: [bId], references: [id])
+  messages    Message[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   aLastSeenAt DateTime?
   bLastSeenAt DateTime?
 
-  @@unique([aId, bId]) // 코드에서 aId_bId 복합 고유로 upsert 사용
+  @@unique([aId, bId])
 }
 
 model Message {
@@ -70,7 +66,6 @@ model Message {
 
   reactions      Reaction[]
 
-  // 조회/페이지네이션 최적화
   @@index([conversationId, createdAt])
 }
 
@@ -83,12 +78,10 @@ model Reaction {
   type      ReactionType
   createdAt DateTime     @default(now())
 
-  // 토글 구현용 복합 유니크 (Prisma Client에서 messageId_userId_type으로 접근)
   @@unique([messageId, userId, type])
 }
 
-// ---------- NextAuth v4 어댑터 표준 스키마 ----------
-
+// ------ NextAuth 표준 ------
 model Account {
   id                String  @id @default(cuid())
   userId            String
