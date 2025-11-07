@@ -1,6 +1,7 @@
+// src/app/layout.tsx
 import "@/styles/globals.css";
-import { ThemeProvider } from "next-themes";
 import { Inter } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import AuthSessionProvider from "@/components/SessionProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import AuthButton from "@/components/AuthButton";
@@ -14,15 +15,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <AuthSessionProvider>
             <div className="mx-auto max-w-screen-sm p-3 sm:p-4">
-              {/* 전역 헤더 */}
-              <!--div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex items-center justify-between">
                 <h1 className="text-lg font-semibold">Chat</h1>
                 <div className="flex items-center gap-2">
                   <ThemeToggle />
                   <AuthButton />
                 </div>
-              </div-->
-
+              </div>
               {children}
             </div>
           </AuthSessionProvider>
