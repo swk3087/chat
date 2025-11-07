@@ -1,0 +1,2 @@
+# prisma/migrations/migration_lock.toml
+provider = "postgresql"
